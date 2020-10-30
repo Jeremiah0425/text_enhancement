@@ -1,0 +1,14 @@
+# 优化词汇表
+python phrase_vocabulary_optimization.py --input_file=./data/train.txt --input_format=wikisplit --vocabulary_size=500 --max_input_examples=1000000 --enable_swap_tag=false --output_file=./output/label_map.txt
+# 制作验证集
+python preprocess_main.py --input_file=./data/dev.txt --input_format=wikisplit --output_tfrecord=./output/dev.tf_record --label_map_file=./output/label_map.txt --vocab_file=./data/RoBERTa-tiny-clue/vocab.txt --max_seq_length=40 --output_arbitrary_targets_for_infeasible_examples=false
+# 制作训练集
+python preprocess_main.py --input_file=./data/train.txt --input_format=wikisplit --output_tfrecord=./output/train.tf_record --label_map_file=./output/label_map.txt --vocab_file=./data/RoBERTa-tiny-clue/vocab.txt --max_seq_length=40 --output_arbitrary_targets_for_infeasible_examples=false
+# 训练模型
+python run_lasertagger.py --training_file=./output/train.tf_record --eval_file=./output/tune.tf_record --label_map_file=./output/label_map.txt --model_config_file=./configs/lasertagger_config.json --output_dir=./output/models/wikisplit_experiment_name --init_checkpoint=./data/RoBERTa-tiny-clue/bert_model.ckpt --do_train=true --do_eval=true --train_batch_size=256 --save_checkpoints_steps=200 --max_seq_length=40 --num_train_examples=319200 --num_eval_examples=5000
+# 模型整理
+python run_lasertagger.py --label_map_file=./output/label_map.txt --model_config_file=./configs/lasertagger_config.json --output_dir=./output/models/wikisplit_experiment_name --do_export=true --export_path=./output/models/wikisplit_experiment_name
+# 根据test文件进行预测
+python predict_main.py --input_file=./data/test.txt --input_format=wikisplit --output_file=./output/models/wikisplit_experiment_name/pred.tsv --label_map_file=./output/label_map.txt --vocab_file=./data/RoBERTa-tiny-clue/vocab.txt --max_seq_length=40 --saved_model=./output/models/wikisplit_experiment_name/1587693553
+# 对第五步预测的文件进行打分。
+python score_main.py --prediction_file=./output/models/wikisplit_experiment_name/pred.tsv

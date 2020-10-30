@@ -1,0 +1,11 @@
+scipy==1.0.0
+Flask==1.1.2
+absl_py==0.10.0
+tensorflow==1.14.0
+xlrd==1.2.0
+requests==2.22.0
+numpy==1.19.2
+termcolor==1.1.0
+bert_tensorflow==1.0.1
+absl==0.0
+bert==2.2.0
